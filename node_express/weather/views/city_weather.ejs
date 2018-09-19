@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Weather</title>
+  <script src="./js/echarts.js"></script>
+  <script src="./js/jquery-3.3.1.js"></script>
+  <script src="./js/echarts-gl.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    body {
+      background: #333;
+    }
+
+    .back_div {
+      width: 100px;
+      height: 60px;
+      background: #333 url('./images/back.jpg') no-repeat;
+      top: 10px;
+      right: 10px;
+      position: absolute;
+      z-index: 1;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <a href="/">
+    <div class="back_div" title="返回上一级"></div>
+  </a>
+  <div id="main" style="width: 100%;height:768px;"></div>
+  <script src="./js/socket.io-1.0.6.js"></script>
+  <script>
+    //获取URL中的参数
+    function getParamString(name) {
+      var paramUrl = window.location.search.substr(1);
+      var paramStrs = paramUrl.split('&');
+      var params = {};
+      for (var index = 0; index < paramStrs.length; index++) {
+        params[paramStrs[index].split('=')[0]] = decodeURI(paramStrs[index].split('=')[1]);
+      }
+      return params[name];
+    }
+
+    city_name = getParamString("city_name");
+    city_name_all = {
+      "北京": "beijing",
+      "上海": "shanghai",
+      "天津": "tianjin",
+      "重庆": "chongqing",
+      "香港": "xianggang",
+      "澳门": "aomen",
+      "安徽": "anhui",
+      "福建": "fujian",
+      "广东": "guangdong",
+      "广西": "guangxi",
+      "贵州": "guizhou",
+      "甘肃": "gansu",
+      "海南": "hainan",
+      "河北": "hebei",
+      "河南": "henan",
+      "黑龙江": "heilongjiang",
+      "湖北": "hubei",
+      "湖南": "hunan",
+      "吉林": "jilin",
+      "江苏": "jiangsu",
+      "江西": "jiangxi",
+      "辽宁": "liaoning",
+      "内蒙古": "neimenggu",
+      "宁夏": "ningxia",
+      "青海": "qinghai",
+      "陕西": "shanxi1",
+      "山西": "shanxi",
+      "山东": "shandong",
+      "四川": "sichuan",
+      "台湾": "taiwan",
+      "西藏": "xizang",
+      "新疆": "xinjiang",
+      "云南": "yunnan",
+      "浙江": "zhejiang"
+    };
+    city_name_py = city_name_all[city_name];
+    var city_weather_info = [];
+    //console.log(city_weather_info);
+
+    // 动态加载js文件
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src = "./js/js_provence/" + city_name_py + ".js";
+    document.getElementsByTagName('head')[0].appendChild(script);
+    // 图标
+    var weatherIcons = {
+      'qing': './images/qing.gif',
+      'duoyun': './images/duoyun.gif',
+      'yin': './images/yin.gif',
+      'xiaoyu': './images/xiaoyu.gif',
+      'zhongyu': './images/zhongyu.gif',
+      'dayu': './images/dayu.gif',
+      'zhenyu': './images/zhenyu.gif',
+      'leizhenyu': './images/leizhenyu.gif',
+    };
+    // 加载地图
+    function load_map_data(weather_data, city_name) {
+      echarts.dispose(document.getElementById("main"))
+      var mapChart = echarts.init(document.getElementById('main'));
+      option = {
+        tooltip: {
+          trigger: 'item',
+          formatter: function (params) {
+            //console.log(params);
+            var data_tmp = params['data'];
+            var str_tmp = params.seriesName + "<br>地区： " + data_tmp.name + "<br>天气： " + data_tmp.value;
+            return str_tmp;
+          }
+        },
+        series: {
+          name: '地区天气情况',
+          type: 'map',
+          map: city_name,
+          show: true,
+          roam: true,
+          itemStyle: { // 定义样式
+            normal: { // 普通状态下的样式
+              areaColor: '#FAC000',
+              borderColor: '#F29500'
+            },
+            emphasis: { // 高亮状态下的样式
+              areaColor: '#D2691E',
+            }
+          },
+          label: {
+            normal: {
+              show: true,
+              color: '#006400',
+              formatter: function (params) {
+                var weather_value = params.data.value;
+                var icon = '';
+                switch (weather_value) {
+                  case '晴':
+                    icon = 'qing';
+                    break;
+                  case '多云':
+                    icon = 'duoyun';
+                    break;
+                  case '阴':
+                    icon = 'yin';
+                    break;
+                  case '小雨':
+                    icon = 'xiaoyu';
+                    break;
+                  case '中雨':
+                    icon = 'zhongyu';
+                    break;
+                  case '大雨':
+                    icon = 'dayu';
+                    break;
+                  case '阵雨':
+                    icon = 'zhenyu';
+                    break;
+                  case '雷阵雨':
+                    icon = 'leizhenyu';
+                    break;
+                  default:
+                    break;
+                }
+                return params.name + '\n{' + icon + '|}';
+              },
+              rich: {
+                qing: {
+                  backgroundColor: {
+                    image: weatherIcons.qing
+                  },
+                },
+                duoyun: {
+                  backgroundColor: {
+                    image: weatherIcons.duoyun
+                  }
+                },
+                yin: {
+                  backgroundColor: {
+                    image: weatherIcons.yin
+                  }
+                },
+                xiaoyu: {
+                  backgroundColor: {
+                    image: weatherIcons.xiaoyu
+                  }
+                },
+                zhongyu: {
+                  backgroundColor: {
+                    image: weatherIcons.zhongyu
+                  }
+                },
+                dayu: {
+                  backgroundColor: {
+                    image: weatherIcons.dayu
+                  }
+                },
+                zhenyu: {
+                  backgroundColor: {
+                    image: weatherIcons.zhenyu
+                  }
+                },
+                leizhenyu: {
+                  backgroundColor: {
+                    image: weatherIcons.leizhenyu
+                  }
+                }
+              }
+            },
+            emphasis: {
+              show: true,
+              color: '#00F5FF',
+            },
+          },
+          data: weather_data,
+        },
+        title: { //标题
+          show: true,
+          text: city_name + '天气信息',
+          subtext: 'WEATHER',
+          x: 20,
+          y: 20,
+          textStyle: {
+            color: '#C5C1AA'
+          }
+        },
+        scaleLimit: { //缩放
+          //max: 1.5,
+          min: 0.75
+        },
+        backgroundColor: '#333', // 图表背景色
+        visualMap: { // visualMap 组件
+          show: true,
+          left: '20',
+          bottom: '200',
+          //selectedMode:'single',
+          categories: ['晴', '多云', '阴', '小雨', '中雨', '大雨', '阵雨', '雷阵雨'],
+          inRange: {
+            symbol: [
+              'image://images/qing.gif',
+              'image://images/duoyun.gif',
+              'image://images/yin.gif',
+              'image://images/xiaoyu.gif',
+              'image://images/zhongyu.gif',
+              'image://images/dayu.gif',
+              'image://images/zhenyu.gif',
+              'image://images/leizhenyu.gif',
+            ],
+          },
+          align: 'left',
+          textStyle: {
+            color: '#fff'
+          },
+          seriesIndex: weather_data
+        },
+      }
+      mapChart.setOption(option);
+    }
+
+    script.onload = function () { //js加载完成后执行
+      // 初始化
+      load_map_data(city_weather_info, city_name);
+    };
+    // 建立socket连接
+    client = io.connect(location.hostname + ':51005');
+    client.on('connect', function () {
+      console.log('client is on listening');
+    });
+    client.on('message', function (msg) {
+      console.log(msg);
+      city_weather_info = msg[city_name];
+      load_map_data(city_weather_info, city_name);
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Weather</title>
+  <script src="./js/echarts.js"></script>
+  <script src="./js/china.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      overflow-x: hidden;
+      overflow-y: hidden;
+    }
+
+    body {
+      background: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="main" style="width: 100%;height:768px;"></div>
+  <script>
+    city_name_all = {
+      "北京": "beijing",
+      "上海": "shanghai",
+      "天津": "tianjin",
+      "重庆": "chongqing",
+      "香港": "xianggang",
+      "澳门": "aomen",
+      "安徽": "anhui",
+      "福建": "fujian",
+      "广东": "guangdong",
+      "广西": "guangxi",
+      "贵州": "guizhou",
+      "甘肃": "gansu",
+      "海南": "hainan",
+      "河北": "hebei",
+      "河南": "henan",
+      "黑龙江": "heilongjiang",
+      "湖北": "hubei",
+      "湖南": "hunan",
+      "吉林": "jilin",
+      "江苏": "jiangsu",
+      "江西": "jiangxi",
+      "辽宁": "liaoning",
+      "内蒙古": "neimenggu",
+      "宁夏": "ningxia",
+      "青海": "qinghai",
+      "陕西": "shanxi",
+      "山西": "shanxi",
+      "山东": "shandong",
+      "四川": "sichuan",
+      "台湾": "taiwan",
+      "西藏": "xizang",
+      "新疆": "xinjiang",
+      "云南": "yunnan",
+      "浙江": "zhejiang"
+    }
+
+    var mapChart = echarts.init(document.getElementById('main'));
+    option = {
+      tooltip: {
+        trigger: 'item',
+        formatter: '{b}'
+      },
+      series: {
+        type: 'map',
+        map: 'china',
+        show: true,
+        roam: true,
+        itemStyle: { // 定义样式
+          normal: { // 普通状态下的样式
+            areaColor: '#FAC000',
+            borderColor: '#F29500'
+          },
+          emphasis: { // 高亮状态下的样式
+            areaColor: '#D2691E',
+          }
+        },
+        label: {
+          normal: {
+            show: true,
+            color: '#006400',
+          },
+          emphasis: {
+            show: true,
+            color: '#00F5FF',
+          },
+        },
+        data: [{name:"北京"},{name:"上海"},{name:"天津"},{name:"重庆"},{name:"香港"},{name:"澳门"},{name:"安徽"},{name:"福建"},{name:"广东"},{name:"广西"},{name:"贵州"},{name:"甘肃"},{name:"海南"},{name:"河北"},{name:"河南"},{name:"黑龙江"},{name:"湖北"},{name:"湖南"},{name:"吉林"},{name:"江苏"},{name:"江西"},{name:"辽宁"},{name:"内蒙古"},{name:"宁夏"},{name:"青海"},{name:"陕西"},{name:"山西"},{name:"山东"},{name:"四川"},{name:"台湾"},{name:"西藏"},{name:"新疆"},{name:"云南"},{name:"浙江"}]
+      },
+      title: { //标题
+        show: true,
+        text: '中国天气信息',
+        subtext: 'WEATHER',
+        x: 20,
+        y: 20,
+        textStyle: {
+          color: '#C5C1AA'
+        }
+      },
+      scaleLimit: { //缩放
+        max: 1.5,
+        min: 0.75
+      },
+      backgroundColor: '#333', // 图表背景色
+    }
+    mapChart.setOption(option);
+
+    //设置点击事件  
+    mapChart.on('click', function (params) {
+      window.location.href = './city_weather?city_name=' + params.name;
+    });
+  </script>
+</body>
+
+</html>
